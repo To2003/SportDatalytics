@@ -22,8 +22,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { upsertPlayerProfile } from "../../actions";
+import { upsertPlayerProfile, updateMemberRole, removeMember } from "../../actions";
 import { upsertPersonalProfile } from "@/app/profile/actions";
+import ChangeRoleForm from "@/components/ChangeRoleForm";
+import RemoveMemberDialog from "@/components/RemoveMemberDialog";
 
 export default async function PlayerProfilePage({
   params,
@@ -171,6 +173,26 @@ export default async function PlayerProfilePage({
         </section>
 
         {error && <p className="text-sm text-destructive">{error}</p>}
+
+        {isCoach && !isMe && (
+          <section>
+            <h2 className="font-heading text-lg font-semibold uppercase tracking-wide mb-3">
+              Administración
+            </h2>
+            <Card>
+              <CardContent className="flex flex-wrap items-end justify-between gap-4">
+                <div className="flex flex-col gap-1.5">
+                  <Label>Rol en el equipo</Label>
+                  <ChangeRoleForm
+                    action={updateMemberRole.bind(null, teamId, memberId)}
+                    currentRole={member.role}
+                  />
+                </div>
+                <RemoveMemberDialog action={removeMember.bind(null, teamId, memberId)} />
+              </CardContent>
+            </Card>
+          </section>
+        )}
 
         {canEdit && (
           <section>

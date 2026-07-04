@@ -87,6 +87,39 @@ export async function addMember(teamId: string, formData: FormData) {
   redirect(`/teams/${teamId}`);
 }
 
+export async function updateMemberRole(teamId: string, memberId: string, formData: FormData) {
+  const role = String(formData.get("role") ?? "player");
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("team_members")
+    .update({ role: role === "coach" ? "coach" : "player" })
+    .eq("id", memberId);
+
+  if (error) {
+    redirect(`/teams/${teamId}/players/${memberId}?error=${encodeURIComponent(error.message)}`);
+  }
+
+  revalidatePath(`/teams/${teamId}`);
+  revalidatePath(`/teams/${teamId}/players/${memberId}`);
+  redirect(`/teams/${teamId}/players/${memberId}`);
+}
+
+// El form de confirmación no manda campos propios (solo confirma el borrado),
+// pero el tipo de action de un <form> requiere aceptar FormData igual.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export async function removeMember(teamId: string, memberId: string, formData: FormData) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("team_members").delete().eq("id", memberId);
+
+  if (error) {
+    redirect(`/teams/${teamId}/players/${memberId}?error=${encodeURIComponent(error.message)}`);
+  }
+
+  revalidatePath(`/teams/${teamId}`);
+  redirect(`/teams/${teamId}`);
+}
+
 export async function upsertPlayerProfile(teamId: string, formData: FormData) {
   const teamMemberId = String(formData.get("team_member_id") ?? "");
   const position = String(formData.get("position") ?? "") || null;
