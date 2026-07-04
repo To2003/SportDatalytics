@@ -70,18 +70,17 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-/* Páginas todavía sin migrar a shadcn dependen de este `body` para su fondo
-   pastel y su color de texto oscuro. Los tokens semánticos --background/
-   --foreground de abajo ahora son los de la paleta dark (para las páginas ya
-   migradas a shadcn), así que acá NO usamos `var(--background)` — se fija el
-   valor viejo literal — para que las páginas sin migrar no hereden el dark
-   real y queden con texto oscuro sobre fondo oscuro.  */
+/* Ya casi toda la app está migrada a shadcn/dark (solo /profile sigue con el
+   look claro, envuelto en su propio <LightPage>) — así que el `body` de base
+   ahora es dark, para que el "rubber-band" de iOS Safari al hacer overscroll
+   muestre dark de fondo en vez del claro viejo. `overscroll-behavior` además
+   evita que la página rebote más allá de su contenido en primer lugar. */
+html,
 body {
-  background:
-    radial-gradient(1200px 600px at 100% -10%, color-mix(in srgb, var(--color-brand-200) 35%, transparent), transparent),
-    radial-gradient(900px 500px at -10% 0%, color-mix(in srgb, var(--color-accent-300) 25%, transparent), transparent),
-    #f6f8f5;
-  color: #14231c;
+  overscroll-behavior-y: none;
+}
+
+body {
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
   min-height: 100dvh;
 }
@@ -116,8 +115,9 @@ body {
 
 /* Dark-only: no hay toggle de tema, así que estos son los únicos valores.
    Paleta: fondo slate-950/900, acentos cyan-400 (primario) y orange-400
-   (secundario), destructive red-400. Solo las páginas migradas a componentes
-   shadcn leen estos tokens — las viejas están blindadas en el `body` de arriba. */
+   (secundario), destructive red-400. Es el fondo de base de `body` (ver
+   @layer base más abajo); /profile se blinda del dark con su propio
+   <LightPage>, que no toca estos tokens. */
 :root {
   --background: #020617;
   --foreground: #f1f5f9;

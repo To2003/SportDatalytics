@@ -9,6 +9,7 @@ import Badge from "@/components/legacy-ui/Badge";
 import { Input, Label } from "@/components/legacy-ui/Field";
 import StatsSummary from "@/components/legacy-ui/StatsSummary";
 import SubmitButton from "@/components/legacy-ui/SubmitButton";
+import LightPage from "@/components/legacy-ui/LightPage";
 import { upsertPersonalProfile } from "./actions";
 
 export default async function ProfilePage({
@@ -75,6 +76,7 @@ export default async function ProfilePage({
   const hasPhysicalData = physicalTiles.length > 0;
 
   return (
+    <LightPage>
     <div className="flex flex-col gap-10">
       <Card className="p-6 bg-gradient-to-br from-accent-400 to-accent-600 text-white flex items-center gap-4">
         <span className="flex h-16 w-16 items-center justify-center rounded-full bg-white/20 text-2xl font-bold border-2 border-white/40">
@@ -227,5 +229,6 @@ export default async function ProfilePage({
         )}
       </section>
     </div>
+    </LightPage>
   );
 }
