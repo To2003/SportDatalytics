@@ -22,18 +22,24 @@ export default function PlayerRadarChart({ data }: { data: RadarPoint[] }) {
   return (
     <div className="h-64 w-full">
       <ResponsiveContainer width="100%" height="100%">
-        <RadarChart data={data} outerRadius="72%">
+        <RadarChart data={data} outerRadius="65%">
+          <defs>
+            <radialGradient id="radarFill" cx="50%" cy="50%" r="70%">
+              <stop offset="0%" stopColor={ACCENT} stopOpacity={0.45} />
+              <stop offset="100%" stopColor={ACCENT} stopOpacity={0.08} />
+            </radialGradient>
+          </defs>
           <PolarGrid stroke={GRID} />
-          <PolarAngleAxis dataKey="attribute" tick={{ fill: LABEL, fontSize: 11 }} />
+          <PolarAngleAxis dataKey="attribute" tick={{ fill: LABEL, fontSize: 11, fontWeight: 600 }} />
           <PolarRadiusAxis domain={[0, 100]} tick={false} axisLine={false} />
           <Radar
             dataKey="value"
             stroke={ACCENT}
-            strokeWidth={2}
-            fill={ACCENT}
-            fillOpacity={0.1}
-            dot={{ r: 4, fill: ACCENT, stroke: "none" }}
+            strokeWidth={2.5}
+            fill="url(#radarFill)"
+            dot={{ r: 4, fill: ACCENT, stroke: "#020617", strokeWidth: 2 }}
             isAnimationActive={false}
+            label={{ fill: ACCENT, fontSize: 12, fontWeight: 700 }}
           />
         </RadarChart>
       </ResponsiveContainer>
