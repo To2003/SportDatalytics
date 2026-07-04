@@ -87,6 +87,46 @@ export async function addMember(teamId: string, formData: FormData) {
   redirect(`/teams/${teamId}`);
 }
 
+// El form de confirmación no manda campos propios, pero el tipo de action de
+// un <form> requiere aceptar FormData igual.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export async function deleteTeam(teamId: string, formData: FormData) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("teams").delete().eq("id", teamId);
+
+  if (error) {
+    redirect(`/teams/${teamId}?error=${encodeURIComponent(error.message)}`);
+  }
+
+  revalidatePath("/teams");
+  redirect("/teams");
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export async function leaveTeam(teamId: string, formData: FormData) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  const { error } = await supabase
+    .from("team_members")
+    .delete()
+    .eq("team_id", teamId)
+    .eq("user_id", user.id);
+
+  if (error) {
+    redirect(`/teams/${teamId}?error=${encodeURIComponent(error.message)}`);
+  }
+
+  revalidatePath("/teams");
+  redirect("/teams");
+}
+
 export async function updateMemberRole(teamId: string, memberId: string, formData: FormData) {
   const role = String(formData.get("role") ?? "player");
 
