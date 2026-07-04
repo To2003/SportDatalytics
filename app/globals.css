@@ -1,26 +1,168 @@
 @import "tailwindcss";
-
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-sans);
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Verde "cancha" — color primario de marca */
+  --color-brand-50: #eefdf3;
+  --color-brand-100: #d5f7e1;
+  --color-brand-200: #aeedc8;
+  --color-brand-300: #78dea8;
+  --color-brand-400: #42c884;
+  --color-brand-500: #1eab6a;
+  --color-brand-600: #128a56;
+  --color-brand-700: #106e47;
+  --color-brand-800: #10573b;
+  --color-brand-900: #0e4832;
+
+  /* Naranja energético — acentos, CTAs secundarios, badges */
+  --color-accent-300: #fdba74;
+  --color-accent-400: #fb923c;
+  --color-accent-500: #f2790f;
+  --color-accent-600: #dd5f08;
+  --color-accent-700: #b8480a;
+
+  --shadow-card: 0 1px 2px rgba(16, 87, 59, 0.06), 0 8px 24px -12px rgba(16, 87, 59, 0.18);
+  --shadow-card-hover: 0 4px 8px rgba(16, 87, 59, 0.08), 0 16px 32px -12px rgba(16, 87, 59, 0.28);
+  --font-heading: var(--font-heading);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* Páginas todavía sin migrar a shadcn dependen de este `body` para su fondo
+   pastel y su color de texto oscuro. Los tokens semánticos --background/
+   --foreground de abajo ahora son los de la paleta dark (para las páginas ya
+   migradas a shadcn), así que acá NO usamos `var(--background)` — se fija el
+   valor viejo literal — para que las páginas sin migrar no hereden el dark
+   real y queden con texto oscuro sobre fondo oscuro.  */
+body {
+  background:
+    radial-gradient(1200px 600px at 100% -10%, color-mix(in srgb, var(--color-brand-200) 35%, transparent), transparent),
+    radial-gradient(900px 500px at -10% 0%, color-mix(in srgb, var(--color-accent-300) 25%, transparent), transparent),
+    #f6f8f5;
+  color: #14231c;
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  min-height: 100dvh;
+}
+
+/* Tailwind v4 pone sus utilidades dentro de @layer, y CSS le da a las reglas
+   "sin capa" prioridad absoluta sobre cualquier regla en capa, sin importar el
+   orden. Si estas clases quedaran sueltas acá afuera, su `background` ganaría
+   siempre por encima de utilidades como bg-gradient-to-br/bg-brand-600 que
+   les pasemos por className, dejando esas tarjetas lavadas/blancas. Por eso
+   van dentro de @layer components: así conviven bien con las utilidades. */
+@layer components {
+  .card {
+    background: white;
+    border-radius: 1rem;
+    box-shadow: var(--shadow-card);
+    transition: box-shadow 150ms ease, transform 150ms ease;
+  }
+
+  .card-hover:hover {
+    box-shadow: var(--shadow-card-hover);
+    transform: translateY(-2px);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Selección de texto en la paleta de marca: sin esto, seleccionar texto sobre
+   tarjetas con gradiente (headers de partido/perfil) se ve con el azul por
+   defecto del navegador, que no combina con la paleta y parece un bug visual. */
+::selection {
+  background: var(--color-brand-200);
+  color: var(--color-brand-900);
+}
+
+/* Dark-only: no hay toggle de tema, así que estos son los únicos valores.
+   Paleta: fondo slate-950/900, acentos cyan-400 (primario) y orange-400
+   (secundario), destructive red-400. Solo las páginas migradas a componentes
+   shadcn leen estos tokens — las viejas están blindadas en el `body` de arriba. */
+:root {
+  --background: #020617;
+  --foreground: #f1f5f9;
+  --card: #0f172a;
+  --card-foreground: #f1f5f9;
+  --popover: #0f172a;
+  --popover-foreground: #f1f5f9;
+  --primary: #22d3ee;
+  --primary-foreground: #020617;
+  --secondary: #fb923c;
+  --secondary-foreground: #020617;
+  --muted: #1e293b;
+  --muted-foreground: #94a3b8;
+  --accent: #1e293b;
+  --accent-foreground: #f1f5f9;
+  --destructive: #f87171;
+  --success: #4ade80;
+  --warning: #facc15;
+  --border: #334155;
+  --input: #334155;
+  --ring: #22d3ee;
+  --chart-1: #22d3ee;
+  --chart-2: #fb923c;
+  --chart-3: #4ade80;
+  --chart-4: #f87171;
+  --chart-5: #facc15;
+  --radius: 0.75rem;
+  --sidebar: #0f172a;
+  --sidebar-foreground: #f1f5f9;
+  --sidebar-primary: #22d3ee;
+  --sidebar-primary-foreground: #020617;
+  --sidebar-accent: #1e293b;
+  --sidebar-accent-foreground: #f1f5f9;
+  --sidebar-border: #334155;
+  --sidebar-ring: #22d3ee;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
 }
