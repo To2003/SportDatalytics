@@ -196,9 +196,7 @@ export default async function PlayerProfilePage({
                       <Label>Posición</Label>
                       <Select name="position" defaultValue={profile?.position ?? ""}>
                         <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Sin posición">
-                            {(value: string) => value || "Sin posición"}
-                          </SelectValue>
+                          <SelectValue placeholder="Sin posición" />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="">Sin posición</SelectItem>
