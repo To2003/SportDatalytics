@@ -12,7 +12,6 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import CopyInviteCodeButton from "@/components/CopyInviteCodeButton";
 import AddMemberDialog from "@/components/AddMemberDialog";
 import EditTeamDialog from "@/components/EditTeamDialog";
-import DeleteTeamDialog from "@/components/DeleteTeamDialog";
 import LeaveTeamDialog from "@/components/LeaveTeamDialog";
 import SubmitButton from "@/components/SubmitButton";
 import { addMember, updateTeam, generateTeamInviteCode, deleteTeam, leaveTeam } from "./actions";
@@ -72,7 +71,7 @@ export default async function TeamPage({
   return (
     <DarkPage>
       <div className="flex flex-col gap-6">
-        <div className="flex items-start gap-4">
+        <div className="flex items-start gap-4 flex-wrap">
           <Avatar size="lg">
             <AvatarFallback className={`${color.bg} ${color.text} font-heading font-semibold text-lg`}>
               {team.name[0]?.toUpperCase()}
@@ -93,17 +92,15 @@ export default async function TeamPage({
               <p className="text-sm text-muted-foreground mt-1">{team.description}</p>
             )}
           </div>
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-2 flex-wrap">
             {isCoach && (
-              <>
-                <EditTeamDialog
-                  action={updateTeam.bind(null, teamId)}
-                  sports={sportsForSelect}
-                  team={team}
-                  error={error}
-                />
-                <DeleteTeamDialog action={deleteTeam.bind(null, teamId)} teamName={team.name} />
-              </>
+              <EditTeamDialog
+                action={updateTeam.bind(null, teamId)}
+                deleteAction={deleteTeam.bind(null, teamId)}
+                sports={sportsForSelect}
+                team={team}
+                error={error}
+              />
             )}
             <LeaveTeamDialog action={leaveTeam.bind(null, teamId)} />
           </div>
