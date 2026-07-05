@@ -66,7 +66,13 @@ export default function EditTeamDialog({
         <form action={action} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="edit-team-name">Nombre</Label>
-            <Input id="edit-team-name" name="name" required defaultValue={team.name} />
+            <Input
+              id="edit-team-name"
+              name="name"
+              required
+              maxLength={40}
+              defaultValue={team.name}
+            />
           </div>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="edit-team-description">Descripción</Label>

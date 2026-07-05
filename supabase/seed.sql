@@ -62,7 +62,7 @@ on conflict (name) do update set
 ------------------------------------------------------------
 insert into sports (name, positions, stat_fields, variants)
 values (
-  'Hockey sobre césped',
+  'Hockey',
   '["Arquero", "Defensor", "Mediocampista", "Delantero"]'::jsonb,
   '[
     {"key": "goals", "label": "Goles", "type": "integer", "unit": null, "min": 0, "max": null, "order": 1},

@@ -50,7 +50,7 @@ export default function CreateTeamDialog({
         <form action={action} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="team-name">Nombre</Label>
-            <Input id="team-name" name="name" required placeholder="Los Tigres" />
+            <Input id="team-name" name="name" required maxLength={40} placeholder="Los Tigres" />
           </div>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="team-description">Descripción</Label>

@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 
 export async function createTeam(formData: FormData) {
-  const name = String(formData.get("name") ?? "").trim();
+  const name = String(formData.get("name") ?? "").trim().slice(0, 40);
   const description = String(formData.get("description") ?? "").trim();
   const sportId = String(formData.get("sport_id") ?? "");
   const variantKey = String(formData.get("variant_key") ?? "").trim();
