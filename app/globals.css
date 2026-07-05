@@ -68,6 +68,17 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+
+  /* Toda la app se sentía chica (mucho uso de text-xs/text-sm) — se sube la
+     escala completa ~2px por paso. Los line-height de Tailwind son ratios
+     unitless (ej. `calc(1 / 0.75)`), así que escalan solos con el nuevo
+     tamaño sin necesidad de tocarlos. */
+  --text-xs: 0.875rem;
+  --text-sm: 1rem;
+  --text-base: 1.125rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.375rem;
+  --text-2xl: 1.625rem;
 }
 
 /* Ya casi toda la app está migrada a shadcn/dark (solo /profile sigue con el
