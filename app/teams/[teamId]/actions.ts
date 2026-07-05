@@ -164,17 +164,21 @@ export async function upsertPlayerProfile(teamId: string, formData: FormData) {
   const teamMemberId = String(formData.get("team_member_id") ?? "");
   const position = String(formData.get("position") ?? "") || null;
   const jerseyRaw = String(formData.get("jersey_number") ?? "");
+  const nickname = String(formData.get("nickname") ?? "").trim() || null;
 
   const supabase = await createClient();
 
-  // Peso/altura/nacimiento/lateralidad viven en `profiles` (una por persona,
-  // no por equipo) — se editan con `upsertPersonalProfile` desde /profile o
-  // desde la página del jugador. Acá solo lo que sí es específico del equipo.
+  // Peso/altura/nacimiento/lateralidad y nombre/apellido/apodo default viven
+  // en `profiles` (una por persona, no por equipo) — se editan desde
+  // /profile o (el físico) desde la página del jugador. Acá solo lo que sí es
+  // específico de este equipo: posición, número de camiseta y un apodo que
+  // pisa el default solo en este equipo.
   const { error } = await supabase.from("player_profiles").upsert(
     {
       team_member_id: teamMemberId,
       position,
       jersey_number: jerseyRaw ? Number(jerseyRaw) : null,
+      nickname,
     },
     { onConflict: "team_member_id" },
   );

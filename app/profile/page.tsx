@@ -10,7 +10,8 @@ import { Input, Label } from "@/components/legacy-ui/Field";
 import StatsSummary from "@/components/legacy-ui/StatsSummary";
 import SubmitButton from "@/components/legacy-ui/SubmitButton";
 import LightPage from "@/components/legacy-ui/LightPage";
-import { upsertPersonalProfile } from "./actions";
+import { displayName } from "@/lib/display-name";
+import { upsertPersonalProfile, upsertPersonalIdentity } from "./actions";
 
 export default async function ProfilePage({
   searchParams,
@@ -24,7 +25,7 @@ export default async function ProfilePage({
     supabase.from("team_members").select("id, role, teams(id, name, sports(name))").eq("user_id", user.id),
     supabase
       .from("profiles")
-      .select("weight_kg, height_cm, birth_date, dominant_side")
+      .select("first_name, last_name, nickname, weight_kg, height_cm, birth_date, dominant_side")
       .eq("user_id", user.id)
       .maybeSingle(),
   ]);
@@ -74,6 +75,7 @@ export default async function ProfilePage({
     },
   ].filter(Boolean) as { icon: typeof Weight; value: string; label: string }[];
   const hasPhysicalData = physicalTiles.length > 0;
+  const hasIdentity = Boolean(personalProfile?.first_name && personalProfile?.last_name);
 
   return (
     <LightPage>
@@ -87,6 +89,57 @@ export default async function ProfilePage({
           <p className="text-sm text-accent-50">{user.email}</p>
         </div>
       </Card>
+
+      {error && <p className="text-sm text-red-600">{error}</p>}
+
+      <section>
+        <h2 className="text-lg font-bold text-brand-900 mb-3">Mis datos</h2>
+        <p className="text-xs text-zinc-500 mb-3">
+          Nombre y apellido son obligatorios. El apodo es opcional y se muestra en vez del nombre
+          en todos tus equipos — salvo que un equipo puntual te ponga uno propio.
+        </p>
+        <Card className="p-5">
+          {hasIdentity && (
+            <p className="text-sm font-semibold text-zinc-900 mb-3">
+              {displayName(personalProfile)}
+              {personalProfile?.nickname ? ` · alias "${personalProfile.nickname}"` : ""}
+            </p>
+          )}
+          <details className="group" open={!hasIdentity}>
+            <summary className="inline-flex items-center gap-1.5 text-sm font-medium text-brand-700 cursor-pointer list-none rounded-lg border border-brand-200 px-3 py-1.5 hover:bg-brand-50 transition-colors w-fit">
+              <Pencil className="h-3.5 w-3.5" />
+              {hasIdentity ? "Editar" : "Completar mis datos"}
+            </summary>
+            <form action={upsertPersonalIdentity} className="grid grid-cols-2 gap-4 mt-3">
+              <Label>
+                Nombre
+                <Input
+                  name="first_name"
+                  required
+                  maxLength={40}
+                  defaultValue={personalProfile?.first_name ?? ""}
+                />
+              </Label>
+              <Label>
+                Apellido
+                <Input
+                  name="last_name"
+                  required
+                  maxLength={40}
+                  defaultValue={personalProfile?.last_name ?? ""}
+                />
+              </Label>
+              <Label className="col-span-2">
+                Apodo
+                <Input name="nickname" maxLength={30} defaultValue={personalProfile?.nickname ?? ""} />
+              </Label>
+              <SubmitButton className="col-span-2" pendingLabel="Guardando...">
+                Guardar
+              </SubmitButton>
+            </form>
+          </details>
+        </Card>
+      </section>
 
       <section>
         <h2 className="text-lg font-bold text-brand-900 mb-3">Mis equipos</h2>
@@ -125,7 +178,6 @@ export default async function ProfilePage({
           Se aplica a todos los equipos donde participás, no hace falta cargarlo por separado.
         </p>
         <Card className="p-5">
-          {error && <p className="text-sm text-red-600 mb-3">{error}</p>}
           {hasPhysicalData && (
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
               {physicalTiles.map(({ icon: Icon, value, label }) => (

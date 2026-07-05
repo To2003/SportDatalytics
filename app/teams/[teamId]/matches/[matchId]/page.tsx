@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Shirt } from "lucide-react";
 import { requireUser } from "@/lib/supabase/require-user";
+import { displayName } from "@/lib/display-name";
 import { effectiveStatFields, emptyStatsForSport, type StatField, type SportVariant } from "@/lib/sports/stat-fields";
 import DynamicStatForm from "@/components/DynamicStatForm";
 import StatsSummary from "@/components/StatsSummary";
@@ -57,10 +58,19 @@ export default async function MatchDetailPage({
   const isCoach = myMembership?.role === "coach";
 
   const [{ data: roster }, { data: callUps }, { data: statsRows }] = await Promise.all([
-    supabase.from("team_members").select("id, user_id, role, player_profiles(position)").eq("team_id", teamId),
+    supabase
+      .from("team_members")
+      .select("id, user_id, role, player_profiles(position, nickname)")
+      .eq("team_id", teamId),
     supabase.from("match_call_ups").select("team_member_id").eq("match_id", matchId),
     supabase.from("match_stats").select("team_member_id, stats").eq("match_id", matchId),
   ]);
+
+  const rosterUserIds = (roster ?? []).map((m) => m.user_id);
+  const { data: rosterProfiles } = rosterUserIds.length
+    ? await supabase.from("profiles").select("user_id, first_name, last_name, nickname").in("user_id", rosterUserIds)
+    : { data: [] };
+  const profileByUserId = new Map((rosterProfiles ?? []).map((p) => [p.user_id, p]));
 
   const calledUpIds = new Set((callUps ?? []).map((c) => c.team_member_id));
   const statsByMember = new Map((statsRows ?? []).map((s) => [s.team_member_id, s.stats]));
@@ -162,7 +172,9 @@ export default async function MatchDetailPage({
                             defaultChecked={calledUpIds.has(member.id)}
                             className="sr-only"
                           />
-                          {member.user_id === user.id ? "Vos" : `Miembro ${member.id.slice(0, 8)}`}
+                          {member.user_id === user.id
+                            ? "Vos"
+                            : displayName(profileByUserId.get(member.user_id), profile?.nickname)}
                           {profile?.position ? ` · ${profile.position}` : ""}
                         </label>
                       );
@@ -192,6 +204,9 @@ export default async function MatchDetailPage({
             <ul className="flex flex-col gap-4">
               {calledUpMembers.map((member) => {
                 const isMe = member.user_id === user.id;
+                const memberProfile = Array.isArray(member.player_profiles)
+                  ? member.player_profiles[0]
+                  : member.player_profiles;
                 const hasStats = statsByMember.has(member.id);
                 const initialValues =
                   statsByMember.get(member.id) ?? emptyStatsForSport({ statFields });
@@ -204,7 +219,9 @@ export default async function MatchDetailPage({
                           <span className="flex h-7 w-7 items-center justify-center rounded-full bg-muted">
                             <Shirt className="h-3.5 w-3.5 text-muted-foreground" />
                           </span>
-                          {isMe ? "Vos" : `Miembro ${member.id.slice(0, 8)}`}
+                          {isMe
+                            ? "Vos"
+                            : displayName(profileByUserId.get(member.user_id), memberProfile?.nickname)}
                         </p>
 
                         <StatsSummary statFields={statFields} values={initialValues} />

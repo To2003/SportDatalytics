@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { Weight, Ruler, Hand, Cake, Pencil } from "lucide-react";
 import { requireUser } from "@/lib/supabase/require-user";
 import { hashColor } from "@/lib/avatar";
+import { displayName } from "@/lib/display-name";
 import { formatDateOnly } from "@/lib/format-date";
 import { effectiveStatFields, type StatField, type SportVariant } from "@/lib/sports/stat-fields";
 import { aggregatePlayerStats, normalizePlayerStats } from "@/lib/sports/normalize-stats";
@@ -70,7 +71,7 @@ export default async function PlayerProfilePage({
 
   const { data: personalProfile } = await supabase
     .from("profiles")
-    .select("weight_kg, height_cm, birth_date, dominant_side")
+    .select("first_name, last_name, nickname, weight_kg, height_cm, birth_date, dominant_side")
     .eq("user_id", member.user_id)
     .maybeSingle();
 
@@ -96,9 +97,11 @@ export default async function PlayerProfilePage({
   );
   const radarData = normalizePlayerStats(sport?.name, aggregated);
 
-  const teamDataSummary = [profile?.position, profile?.jersey_number ? `#${profile.jersey_number}` : null].filter(
-    Boolean,
-  );
+  const teamDataSummary = [
+    profile?.nickname ? `Apodo: ${profile.nickname}` : null,
+    profile?.position,
+    profile?.jersey_number ? `#${profile.jersey_number}` : null,
+  ].filter(Boolean);
   const hasTeamData = teamDataSummary.length > 0;
 
   const physicalTiles = [
@@ -146,7 +149,7 @@ export default async function PlayerProfilePage({
             </Avatar>
             <div className="flex-1 min-w-0">
               <h1 className="font-heading text-2xl font-semibold uppercase tracking-wide truncate">
-                {isMe ? "Vos" : `Miembro ${member.id.slice(0, 8)}`}
+                {isMe ? "Vos" : displayName(personalProfile, profile?.nickname)}
               </h1>
               <div className="flex items-center gap-2 mt-1">
                 <Badge variant={member.role === "coach" ? "secondary" : "default"}>
@@ -214,6 +217,16 @@ export default async function PlayerProfilePage({
                     className="grid grid-cols-2 gap-4 mt-3"
                   >
                     <input type="hidden" name="team_member_id" value={member.id} />
+                    <div className="col-span-2 flex flex-col gap-1.5">
+                      <Label htmlFor="nickname">Apodo en este equipo</Label>
+                      <Input
+                        id="nickname"
+                        name="nickname"
+                        maxLength={30}
+                        placeholder={personalProfile?.nickname || "Sin apodo específico"}
+                        defaultValue={profile?.nickname ?? ""}
+                      />
+                    </div>
                     <div className="col-span-2 flex flex-col gap-1.5">
                       <Label>Posición</Label>
                       <Select name="position" defaultValue={profile?.position ?? ""}>

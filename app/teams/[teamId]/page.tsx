@@ -4,6 +4,7 @@ import { Calendar, ChevronRight, BarChart3 } from "lucide-react";
 import { requireUser } from "@/lib/supabase/require-user";
 import { sportIcon } from "@/lib/sports/icons";
 import { hashColor } from "@/lib/avatar";
+import { displayName } from "@/lib/display-name";
 import DarkPage from "@/components/DarkPage";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -39,7 +40,7 @@ export default async function TeamPage({
       supabase.from("sports").select("id, name, variants").order("name"),
       supabase
         .from("team_members")
-        .select("id, user_id, role, player_profiles(position, jersey_number)")
+        .select("id, user_id, role, player_profiles(position, jersey_number, nickname)")
         .eq("team_id", teamId)
         .order("role"),
       supabase
@@ -53,6 +54,12 @@ export default async function TeamPage({
   if (!team) {
     notFound();
   }
+
+  const memberUserIds = (members ?? []).map((m) => m.user_id);
+  const { data: profiles } = memberUserIds.length
+    ? await supabase.from("profiles").select("user_id, first_name, last_name, nickname").in("user_id", memberUserIds)
+    : { data: [] };
+  const profileByUserId = new Map((profiles ?? []).map((p) => [p.user_id, p]));
 
   const sport = Array.isArray(team.sports) ? team.sports[0] : team.sports;
   const variants = (sport?.variants ?? []) as { key: string; label: string }[];
@@ -167,7 +174,9 @@ export default async function TeamPage({
                           </Avatar>
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-semibold truncate">
-                              {isMe ? "Vos" : `Miembro ${member.id.slice(0, 8)}`}
+                              {isMe
+                                ? "Vos"
+                                : displayName(profileByUserId.get(member.user_id), profile?.nickname)}
                             </p>
                             <div className="flex items-center gap-2 mt-1">
                               <Badge variant={member.role === "coach" ? "secondary" : "default"}>
